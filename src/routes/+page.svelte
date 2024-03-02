@@ -1,2 +1,7 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<svelte:head>
+	<title>Home</title>
+</svelte:head>
+
+<h1>Aaron Wubshet</h1>
+<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad iste deserunt facilis amet, ipsa impedit sunt quisquam, fuga est, explicabo quia at! Nostrum maxime molestiae dolorum doloremque qui fugiat! Nobis! Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sit deleniti necessitatibus dignissimos nemo incidunt? Inventore quas adipisci ipsum nulla, eum officiis doloribus vitae labore distinctio accusantium totam iusto dignissimos cumque. Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil magni, ducimus sed minima natus minus, nemo nobis quam quasi veritatis quisquam officia quos fugit. Non libero dolor labore recusandae quaerat.</p>
+<img src="images/aaron.jpeg" alt="Aaron Wubshet" style = "width: 50%; height: 50%"/>

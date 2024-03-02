@@ -1,6 +1,6 @@
 [
     {
-        "title": "wowLorem ipsum dolor sit.",
+        "title": "Lorem ipsum dolor sit.",
         "image": "https://vis-society.github.io/labs/2/images/empty.svg",
         "description": "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ut iste voluptates quaerat aperiam amet officia, sit at distinctio ipsa et libero. Maxime rerum soluta modi, nobis explicabo nostrum culpa delectus!"
     },
@@ -43,20 +43,5 @@
         "title": "Repellat, ipsum aliquid. Harum.",
         "image": "https://vis-society.github.io/labs/2/images/empty.svg",
         "description": "Expedita enim dolor obcaecati sequi qui voluptates ad est dolores dolore, iusto nobis inventore ipsam autem architecto amet? Consectetur iure laboriosam incidunt! Laudantium ipsam a deserunt, cum nesciunt voluptates obcaecati!"
-    },
-    {
-        "title": "Repellendus temporibus earum dolorum.",
-        "image": "https://vis-society.github.io/labs/2/images/empty.svg",
-        "description": "Ab praesentium voluptas amet nisi cum autem blanditiis quo quod dolorum quisquam ea recusandae veniam nam, aliquid dolorem est fugiat, officia minima! Soluta eos quasi praesentium dolorem et accusantium itaque?"
-    },
-    {
-        "title": "Enim aliquid sint nulla.",
-        "image": "https://vis-society.github.io/labs/2/images/empty.svg",
-        "description": "Enim at iste fugit rem expedita labore sapiente fuga aliquid eos. Est quisquam dolor deserunt nisi? Quod porro consequuntur eligendi aut corrupti! Minima maiores laudantium eum dolores ab, beatae illo?"
-    },
-    {
-        "title": "Accusamus voluptas quibusdam totam.",
-        "image": "https://vis-society.github.io/labs/2/images/empty.svg",
-        "description": "Autem tempora, non ipsa ad aperiam nemo assumenda blanditiis magni harum, sunt illo reiciendis adipisci possimus facilis dolorem dolores doloribus asperiores illum vel doloremque. Qui recusandae quibusdam tenetur repellat molestiae?"
     }
 ]

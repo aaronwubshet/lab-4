@@ -19,11 +19,6 @@
 
 <style>
 
-    .projects {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
-    }
-
     article {
     grid-template-rows: subgrid;
     grid-row: span 3;

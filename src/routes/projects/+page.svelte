@@ -9,10 +9,9 @@ import Project from "$lib/Project.svelte";
 	<title>Projects</title>
 </svelte:head>
 
-<h1>{projects.length} Projects 
-    <div class = "projects">
-        {#each projects as p}
-            <Project info={p} hLevel=1 />
-        {/each}
-    </div>    
-</h1>
+<h1>{projects.length} Projects </h1>
+        <div class = "projects">
+            {#each projects as p}
+                    <Project info={p} hLevel=1 />
+            {/each}
+        </div>    

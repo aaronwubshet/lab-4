@@ -8,11 +8,9 @@
 
 </script>
 
-
-
 <article>
     <svelte:element this={"h" + hLevel}>{ p.title }</svelte:element>
-    <img src={p.image} alt="">
+    <img src={p.image} alt="TBD">
     <p>{p.description}</p>
     
 </article>

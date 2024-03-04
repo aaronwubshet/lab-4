@@ -26,13 +26,13 @@ li {
   display: contents;
 }
 
-nav {
+/* nav {
   display: flex;
   margin-bottom: 3%;
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: oklch(50% 10% 200 / 40%);
-}
+} */
 
 a.current {
   color: red;
@@ -50,13 +50,13 @@ a {
   padding: 0.5em;
 }
 
-a:hover{
+/* a:hover{
   padding-bottom: 1%;
   border-bottom-width: .4em;
   border-bottom-style: solid;
   border-bottom-color: var(--color-accent);
   background-color: color-mix(in oklch, var(--color-accent), canvas 85%);
-}
+} */
 
 /* form {
   display: flex;
@@ -89,8 +89,8 @@ img {
 
 /* article {
   grid-template-rows: subgrid;
-  grid-row: span 3; */
-} 
+  grid-row: span 3; 
+}  */
 h2 {
   margin: 0;
 }

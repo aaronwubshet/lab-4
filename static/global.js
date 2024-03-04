@@ -14,24 +14,24 @@ let pages = {
 };
 
 let nav = document.createElement("nav");
-document.body.prepend(nav);
+// document.body.prepend(nav);
 
-for (let url in pages) {
+// for (let url in pages) {
     
     
-	let title = pages[url];
-	let a = document.createElement("a");
-    a.href = url;
-    a.textContent = title;
-    nav.append(a);
+// 	let title = pages[url];
+// 	let a = document.createElement("a");
+//     a.href = url;
+//     a.textContent = title;
+//     nav.append(a);
 
-    if (a.host === location.host && a.pathname === location.pathname) {
-        a.classList.add("current");
-    }
-    else if (a.host != location.host) {
-        a.target = "_blank";
-    }
-};
+//     if (a.host === location.host && a.pathname === location.pathname) {
+//         a.classList.add("current");
+//     }
+//     else if (a.host != location.host) {
+//         a.target = "_blank";
+//     }
+// };
 
 document.body.insertAdjacentHTML("afterbegin", `
 <label class="color-scheme-button">

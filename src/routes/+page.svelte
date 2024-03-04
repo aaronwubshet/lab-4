@@ -13,9 +13,9 @@
 <img src="images/aaron.jpeg" alt="Aaron Wubshet" style = "width: 50%; height: 50%"/>
 
 <h2>Selected Projects</h2>
-	{#each projects.slice(0,3) as p}
-		<div class = "projects">
-			<Project info={p} hLevel=4 />
-		</div>
-	{/each}
+	<div class = "projects">
+		{#each projects.slice(0,3) as p}
+				<Project info={p} hLevel=3 />
+		{/each}
+	</div>
 

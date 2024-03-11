@@ -1,16 +1,26 @@
 
 <script>
-    import "../style.css";
-    let pages = [
-	{url: "./", title: "Home"},
-	{url: "./projects", title: "Projects"},
-    {url: "./contact", title: "Contact"},
-    {url: "./resumeCV", title: "Resume"},
-    {url: "https://github.com/aaronwubshet", title: "Github profile"}
-];
-    import { page } from '$app/stores';
 
+  import "../style.css";
+  let pages = [
+  {url: "./", title: "Home"},
+  {url: "./projects", title: "Projects"},
+  {url: "./contact", title: "Contact"},
+  {url: "./resumeCV", title: "Resume"},
+  {url: "https://github.com/aaronwubshet", title: "Github profile"}
+  ];
+  import { page } from '$app/stores';
+  
+  let localStorage = globalThis.localStorage ?? {};
+  $: localStorage.colorScheme = colorScheme;
+  let colorScheme = "light dark";
+  if (localStorage.colorScheme) {
+	  colorScheme = localStorage.colorScheme;
+    }
 
+  let root = globalThis?.document?.documentElement;
+
+  $: root?.style.setProperty("color-scheme", colorScheme);
 
 </script>
 
@@ -20,8 +30,25 @@
 	{/each}
 </nav>
 
-<style>
+<label class="color-scheme-button">
+  Theme:
+  
+  <select bind:value={ colorScheme }>
+      <option value="light dark">Automatic</option>
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+  </select>
+</label>`
 
+
+<style>
+.color-scheme-button {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  font-size: 80%;
+  font-family: inherit;
+}
 nav {
   display: flex;
   margin-bottom: 3%;

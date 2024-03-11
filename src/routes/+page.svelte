@@ -2,6 +2,11 @@
 <script>
 	import projects from '$lib/projects.json';
 	import Project from "$lib/Project.svelte";
+	
+	let profileData = fetch("https://api.github.com/users/your-username");
+
+	
+
 </script>
 
 <svelte:head>
@@ -13,9 +18,38 @@
 <img src="images/aaron.jpeg" alt="Aaron Wubshet" style = "width: 50%; height: 50%"/>
 
 <h2>Selected Projects</h2>
-	<div class = "projects">
+<div class = "projects">
 		{#each projects.slice(0,3) as p}
 				<Project info={p} hLevel=3 />
 		{/each}
 	</div>
+<section class = "githubstats">
 
+	<h2>Github Stats</h2>
+	{#await fetch("https://api.github.com/users/aaronwubshet") }
+	<p>Loading...</p>
+	{:then response}
+		{#await response.json()}
+			<p>Decoding...</p>
+		{:then data}
+			<dl>
+				<dt>Followers:</dt>
+					<dd>{data.followers}</dd>
+				<dt>Following:</dt>
+					<dd>{data.following}</dd>
+				<dt>Public Repos:</dt>
+					<dd>{data.public_repos}</dd>
+				<dt>Public Gists:</dt>
+					<dd>{data.public_gists}</dd>
+			</dl>
+		{:catch error}
+			<p class="error">
+				Something went wrong: {error.message}
+			</p>
+		{/await}
+	{:catch error}
+		<p class="error">
+			Something went wrong: {error.message}
+		</p>
+	{/await}
+</section>

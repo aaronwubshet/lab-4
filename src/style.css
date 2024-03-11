@@ -2,37 +2,44 @@
   --color-accent: oklch(65% 50% 0);
   color-scheme: light dark;
 }
-.color-scheme-button {
-  position: absolute;
-  top: 1em;
-  right: 1em;
-  font-size: 80%;
-  font-family: inherit;
-}
+
 body {
-    /* Set line height to 1.5 times the font size
-       and use the OS’s UI font as the website font
-     */
+
     font: 100%/1.5 system-ui;
     max-width: 75%;
     margin-inline: auto;
     padding: auto;
+  
 }
 ul {
   display: contents;
 }
+dl{
+  display: grid;
+  grid-template-columns: 4 1fr;
+  gap: .5em;
+}
+dt{
+  grid-row: 1; 
+  color: lightslategrey; /* Set text color to light grey */
+  
+}
 
+dd{
+  grid-row: 2; /* Place on the second row of the grid */
+  font-size: 1.5em; /* Set font size to 1.2 times the default */
+  margin: 0; /* Remove the default margin */
+}
+.githubstats{
+  
+  border-color: darkgray;
+  border-width: 2px;
+  border-style: solid;
+  padding: 1em;
+}
 li {
   display: contents;
 }
-
-/* nav {
-  display: flex;
-  margin-bottom: 3%;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: oklch(50% 10% 200 / 40%);
-} */
 
 a.current {
   color: red;
@@ -50,22 +57,6 @@ a {
   padding: 0.5em;
 }
 
-/* a:hover{
-  padding-bottom: 1%;
-  border-bottom-width: .4em;
-  border-bottom-style: solid;
-  border-bottom-color: var(--color-accent);
-  background-color: color-mix(in oklch, var(--color-accent), canvas 85%);
-} */
-
-/* form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-  margin-block: 1em;
-} */
 
 form{
   display: grid;
@@ -87,10 +78,7 @@ img {
   grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
 }
 
-/* article {
-  grid-template-rows: subgrid;
-  grid-row: span 3; 
-}  */
+
 h2 {
   margin: 0;
 }

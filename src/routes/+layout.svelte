@@ -38,7 +38,7 @@
       <option value="dark">Dark</option>
       <option value="light">Light</option>
   </select>
-</label>`
+</label>
 
 
 <style>

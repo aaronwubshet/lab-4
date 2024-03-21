@@ -10,8 +10,11 @@
 
         let filteredProjects;
         $: filteredProjects = projects.filter((project) => {
+                
                 let values = Object.values(project).join("\n").toLowerCase();
                 return values.includes(query.toLowerCase());
+                
+                
         });
 
         
@@ -26,33 +29,24 @@
         $: pieData = rolledData.map(([year, count]) => {
                 return { value: count, label: year };
         });
-
         let selectedYearIndex = -1;
-
-        let selectedYear
+        let selectedYear;
         $: selectedYear = selectedYearIndex > -1 ? pieData[selectedYearIndex].label : null;
-
         let filteredByYear;
         $: filteredByYear = projects.filter((project) => {
-
                 if (selectedYear) {
                 return project.year === selectedYear;
                 }
-
                 return true;
                 });
-
-
+        $: console.log(filteredProjects);
 </script>
 
 <svelte:head>
 	<title>Projects</title>
 </svelte:head>
 
-
 <Pie data="{pieData}" bind:selectedIndex="{selectedYearIndex}" />
-
-
 
 <input class="search"
         type="search"
@@ -61,9 +55,10 @@
         placeholder="🔍 Search projects…"
 />
 
-<h1>{filteredByYear.length} Projects </h1>
+<h1>{filteredProjects.length} Projects </h1>
         <div class = "projects">
-            {#each filteredByYear as p}
+        
+            {#each filteredProjects as p}
                     <Project info={p} hLevel=1 />
             {/each}
         </div>
@@ -72,9 +67,6 @@
         .search {
                 width: 100%;
                 font-size: 3em;
-
         }
-        
-
 </style>
 

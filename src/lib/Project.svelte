@@ -2,17 +2,16 @@
 
 <script>
     export let info = {};
-    let p = info;
-
+    
     export let hLevel = 2;
 
 </script>
 
 <article>
-    <svelte:element this={"h" + hLevel}>{ p.title }</svelte:element>
-    <img src={p.image} alt="TBD">
-    <p>{p.description}</p>
-    <p class = "date">c. {p.year}</p>
+    <svelte:element this={"h" + hLevel}>{ info.title }</svelte:element>
+    <img src={info.image} alt="TBD">
+    <p>{info.description}</p>
+    <p class = "date">c. {info.year}</p>
 </article>
 
 <style>

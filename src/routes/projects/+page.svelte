@@ -39,7 +39,6 @@
                 }
                 return true;
                 });
-        $: console.log(filteredProjects);
 </script>
 
 <svelte:head>

@@ -5,7 +5,7 @@
 
     let data = [];
     let commits = [];
-    let totalLines = 0;
+    let totalLinesout = 0;
     let workByPeriod = [];
     let maxPeriod = 0;
     let avgDepth = 0;
@@ -20,7 +20,7 @@
     let yAxisGridlines;
     let hoveredIndex = -1;
     let cursor = {x: 0, y: 0};
-
+    let dotSizescale;
 
     let usableArea = {
         top: margin.top,
@@ -31,35 +31,12 @@
     usableArea.width = usableArea.right - usableArea.left;
     usableArea.height = usableArea.bottom - usableArea.top;
     
-    $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
-
-    $: if (commits.length > 0) {
-        yScale = scaleLinear()
+    yScale = scaleLinear()
         .domain([0, 24])
         .range([usableArea.bottom, usableArea.top]);
 
-        xScale = scaleTime()
-        .domain(d3.extent(commits, d => d.datetime))
-        .range([usableArea.left, usableArea.right])
-        .nice();
-
-                
-            
-        d3.select(xAxis).call(d3.axisBottom(xScale));
-        d3.select(yAxis).call(d3.axisLeft(yScale).tickFormat(d => String(d % 24).padStart(2, "0") + ":00"));
-        d3.select(yAxisGridlines).call(
-            d3.axisLeft(yScale)
-            .tickFormat("")
-            .tickSize(-usableArea.width)
-        );
-
-        
-
-    }
-
-
-
-
+    $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
+    
     onMount(async () => {
         data = await d3.csv("loc.csv", row => ({
         ...row,
@@ -93,11 +70,35 @@
 
             return ret;
         });
+        commits = d3.sort(commits, d => -d.totalLines);
 
-        totalLines = commits[0].totalLines;
+        
+        xScale = scaleTime()
+            .domain(d3.extent(commits, d => d.datetime))
+            .range([usableArea.left, usableArea.right])
+            .nice();
+
+
+        dotSizescale = d3.scaleSqrt()
+            .domain(d3.extent(commits, d => d.totalLines))
+            .range([2,30]);
+                
+            
+        d3.select(xAxis).call(d3.axisBottom(xScale));
+        d3.select(yAxis).call(d3.axisLeft(yScale).tickFormat(d => String(d % 24).padStart(2, "0") + ":00"));
+        d3.select(yAxisGridlines).call(
+            d3.axisLeft(yScale)
+            .tickFormat("")
+            .tickSize(-usableArea.width)
+        );
+        
+
+        totalLinesout = commits[0].totalLines;
         avgDepth = d3.mean(data, d => d.depth);
-        $: workByPeriod = d3.rollups(data, v => v.length, d => d.datetime.toLocaleString("en", {dayPeriod: "short"}))
-        $: maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
+        workByPeriod = d3.rollups(data, v => v.length, d => d.datetime.toLocaleString("en", {dayPeriod: "short"}))
+        maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
+
+        
 
     });
 
@@ -193,7 +194,7 @@
 	<dt>Total <abbr title="Lines of code">LOC</abbr></dt>
 	<dd>{data.length}</dd>
     <dt>Lines Editted by Last Commit </dt>
-	<dd>{totalLines}</dd>
+	<dd>{totalLinesout}</dd>
     <dt>Most commits are done</dt>
 	<dd>{maxPeriod}</dd>
     <dt>The average depth is</dt>
@@ -229,8 +230,9 @@
             <circle
                 cx={ xScale(commit.datetime) }
                 cy={ yScale(commit.hourFrac) }
-                r="5"
+                r={dotSizescale(commit.totalLines)}
                 fill="steelblue"
+                fill-opacity={commit === hoveredCommit ? 1 : 0.6}
     	        on:mouseenter={evt => {
                     hoveredIndex = index;
                     cursor = {x: evt.x, y: evt.y};

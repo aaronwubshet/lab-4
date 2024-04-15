@@ -3,6 +3,8 @@
 
     import { onMount } from "svelte";
 
+    import Pie from "$lib/Pie.svelte";
+
     let data = [];
     let commits = [];
     let totalLinesout = 0;
@@ -21,6 +23,11 @@
     let hoveredIndex = -1;
     let cursor = {x: 0, y: 0};
     let dotSizescale;
+    let svg;
+    let brushSelection;
+    let selectedLines;
+    let languageBreakdown;
+
 
     let usableArea = {
         top: margin.top,
@@ -36,7 +43,36 @@
         .range([usableArea.bottom, usableArea.top]);
 
     $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
+
+   
+    $: d3.select(svg).call(d3.brush().on("start brush end", brushed));
+
+    function brushed (evt) {
+        brushSelection = evt.selection
+    }
+    function isCommitSelected (commit) {
+        if (!brushSelection) {
+            return false;
+        }
+        let min = {x: brushSelection[0][0], y: brushSelection[0][1]};
+        let max = {x: brushSelection[1][0], y: brushSelection[1][1]};
+        let x = xScale(commit.date);
+        let y = yScale(commit.hourFrac);
+        
+        return x >= min.x && x <= max.x && y >= min.y && y <= max.y;
+    }
+    $: selectedCommits = brushSelection ? commits.filter(isCommitSelected) : [];
+    $: hasSelection = brushSelection && selectedCommits.length > 0;
+    $: selectedLines = (hasSelection ? selectedCommits : commits).flatMap(d => d.lines);
+    const format = d3.format(".1~%");
+    $: languageBreakdown = d3.rollup(
+        selectedLines,
+        v => d3.count(v, d => d.line)/ selectedLines.length,
+        d => d.type
+    );
     
+    
+
     onMount(async () => {
         data = await d3.csv("loc.csv", row => ({
         ...row,
@@ -46,8 +82,7 @@
         date: new Date(row.date + "T00:00" + row.timezone),
         datetime: new Date(row.datetime)
         }) );
-
-
+        
         commits = d3.groups(data, d => d.commit).map(([commit, lines]) => {
             let first = lines[0];
             let {author, date, time, timezone, datetime} = first;
@@ -56,7 +91,8 @@
                 url: "https://github.com/vis-society/lab-7/commit/" + commit,
                 author, date, time, timezone, datetime,
                 hourFrac: datetime.getHours() + datetime.getMinutes() / 60,
-                totalLines: lines.length
+                totalLines: lines.length,
+                language: first.type
             };
 
             // Like ret.lines = lines
@@ -99,11 +135,7 @@
         maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
 
         
-
     });
-
-
-
 </script>
 
 <svelte:head>
@@ -111,6 +143,21 @@
 </svelte:head>
 
 <style>
+
+    @keyframes marching-ants {
+        to {
+            stroke-dashoffset: -8; /* 5 + 3 */
+        }
+    }
+
+    svg :global(.selection) {
+        fill-opacity: 10%;
+        stroke: black;
+        stroke-opacity: 70%;
+        stroke-dasharray: 5 3;
+        animation: marching-ants 2s linear infinite;
+    }
+
     .gridlines {
         stroke-opacity: .2;
     }
@@ -185,10 +232,16 @@
 
 		}
 	}
+    .selected {
+        stroke: black;
+        stroke-width: 2;
+        fill: red;
+    }
 </style>
 
 <h1>Meta</h1>
 <p> This page contains stats about the code base</p>
+
 
 <dl class="stats">
 	<dt>Total <abbr title="Lines of code">LOC</abbr></dt>
@@ -218,29 +271,35 @@
 </dl>
 
 <svg viewBox="0 0 {width} {height}">
-	
     <g transform="translate(0, {usableArea.bottom})" bind:this={xAxis} />
     <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
-
-
+    <g bind:this={svg} />
     <g class="gridlines" transform="translate({usableArea.left}, 0)" bind:this={yAxisGridlines} />
-
     <g class="dots">
         {#each commits as commit, index }
             <circle
                 cx={ xScale(commit.datetime) }
                 cy={ yScale(commit.hourFrac) }
                 r={dotSizescale(commit.totalLines)}
-                fill="steelblue"
+                fill='steelblue'
                 fill-opacity={commit === hoveredCommit ? 1 : 0.6}
+                class:selected={isCommitSelected(commit)}
     	        on:mouseenter={evt => {
                     hoveredIndex = index;
                     cursor = {x: evt.x, y: evt.y};
                 }}
-	            on:mouseleave={evt => hoveredIndex = -1}
-                
+	            on:mouseleave={evt => hoveredIndex = -1}        
             />
         {/each}
     </g>    
-        
+    
+    
 </svg>
+<p>{hasSelection ? selectedCommits.length : "No"} commits selected</p>
+<dl class="stats">
+    {#each languageBreakdown as [language, proportion]}
+      <dd>{language}: {format(proportion)}</dd>
+    {/each}
+  </dl>
+
+<Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: (lines)*selectedLines.length}))} />

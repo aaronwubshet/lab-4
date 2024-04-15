@@ -2,13 +2,8 @@
     import * as d3 from "d3";
     let arcGenerator = d3.arc().innerRadius(0).outerRadius(50);
 
-    
     export let data = [];
 
-
-
-    
-    
     let sliceGenerator = d3.pie().value((d) => d.value);
 
     $: arcData = sliceGenerator(data);

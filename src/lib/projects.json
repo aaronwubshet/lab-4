@@ -1,9 +1,9 @@
 [
     {
-        "title": "alpha",
+        "title": "Bike Mapping",
         "year": 2024,
-        "image": "https://vis-society.github.io/labs/2/images/empty.svg",
-        "description": "123Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ut iste voluptates quaerat aperiam amet officia, sit at distinctio ipsa et libero. Maxime rerum soluta modi, nobis explicabo nostrum culpa delectus!"
+        "image": "../../images/projectimg.png",
+        "description": "Created a time filterable bike map flow for Cambridge and Boston as part of Lab 8 in the course 6.C85"
     },
     {
         "title": "beta",

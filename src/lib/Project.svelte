@@ -1,5 +1,3 @@
-
-
 <script>
     export let info = {};
     

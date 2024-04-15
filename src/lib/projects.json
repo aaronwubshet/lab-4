@@ -2,7 +2,7 @@
     {
         "title": "Bike Mapping",
         "year": 2024,
-        "image": "https://github.com/aaronwubshet/lab-4/blob/13ecec51253a7cb1892b6b90d337bbbd1019b133/static/images/projectimg.png",
+        "image": "images/projectimg.png",
         "description": "Created a time filterable bike map flow for Cambridge and Boston as part of Lab 8 in the course 6.C85"
     },
     {

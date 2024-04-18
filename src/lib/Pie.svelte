@@ -19,14 +19,33 @@
 
 <div class="container">
 <svg viewBox="-50 -50 100 100">
-    {#each arcs as arc, i}
+
+    {#each data as d, i}
+            <path 
+            d={arcs[i]} 
+            fill={ colors(d.label)  }
+            class:selected={selectedIndex === i}
+            on:click={e => selectedIndex = selectedIndex === i ? -1 : i}
+            on:keydown={e => { if (e.key === 'Enter') selectedIndex = selectedIndex === i ? -1 : i }}
+            tabindex="0"
+            role="button"
+        />
+        <!-- <path 
+        d={arcs[i]} 
+        fill={ colors(d.label)  }
+        class:selected={selectedIndex === i}
+        on:click={e => selectedIndex = selectedIndex === i ? -1 : i}    
+        /> -->
+    {/each}
+
+    <!-- {#each arcs as arc, i}
         <path 
         d="{arc}" 
         fill={colors(i)}
         class:selected={selectedIndex === i}
         on:click={e => selectedIndex = selectedIndex === i ? -1 : i}    
         />
-    {/each}
+    {/each} -->
     
 </svg>
 

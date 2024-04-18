@@ -4,6 +4,15 @@
     import { onMount } from "svelte";
 
     import Pie from "$lib/Pie.svelte";
+    import {
+        computePosition,
+        autoPlacement,
+        offset,
+    } from '@floating-ui/dom';
+
+    
+    let commitTooltip;
+    let tooltipPosition = {x: 0, y: 0};
 
     let data = [];
     let commits = [];
@@ -21,7 +30,6 @@
     let yAxis;
     let yAxisGridlines;
     let hoveredIndex = -1;
-    let cursor = {x: 0, y: 0};
     let dotSizescale;
     let svg;
     let selectedLines;
@@ -37,6 +45,30 @@
     usableArea.width = usableArea.right - usableArea.left;
     usableArea.height = usableArea.bottom - usableArea.top;
     
+
+    async function dotInteraction (index, evt) {
+        let hoveredDot = evt.target;
+        if (evt.type === "mouseenter" || evt.type === "focus") {
+            hoveredIndex = index;
+            tooltipPosition = await computePosition(hoveredDot, commitTooltip, {
+                strategy: "fixed", // because we use position: fixed
+                middleware: [
+                    offset(5), // spacing from tooltip to dot
+                    autoPlacement() // see https://floating-ui.com/docs/autoplacement
+                ],
+            });
+
+        }
+        
+        else if (evt.type === "click"|| ((evt.type === "keyup") && (evt.key === "Enter"))  ){
+            selectedCommits=[commits[index]];
+        }
+        else if (evt.type === "mouseleave" || evt.type === "blur") {
+            hoveredIndex = -1;
+        }
+        
+    }
+
     yScale = scaleLinear()
         .domain([0, 24])
         .range([usableArea.bottom, usableArea.top]);
@@ -253,7 +285,7 @@
     <dt>The average depth is</dt>
 	<dd>{avgDepth}</dd>
 </dl>
-<dl id="commit-tooltip" class="info tooltip" hidden={hoveredIndex === -1} style="top: {cursor.y}px; left: {cursor.x}px">
+<dl id="commit-tooltip" class="info tooltip" hidden={hoveredIndex === -1} bind:this={commitTooltip} style="top: {tooltipPosition.y}px; left: {tooltipPosition.x}px">
 	<dt>Commit</dt>
 	<dd><a href="{ hoveredCommit.url }" target="_blank">{ hoveredCommit.id }</a></dd>
 
@@ -275,6 +307,53 @@
     <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
     <g bind:this={svg} />
     <g class="gridlines" transform="translate({usableArea.left}, 0)" bind:this={yAxisGridlines} />
+    <!-- <g class="dots">
+        {#each commits as commit, index }
+            <g
+                tabindex="0"
+                role="button"
+                aria-describedby="commit-tooltip"
+                on:click={evt => dotInteraction(index, evt)}
+                on:keyup={evt => dotInteraction(index, evt)}
+                on:mouseenter={evt => dotInteraction(index, evt)}
+                on:mouseleave={evt => dotInteraction(index, evt)}
+                on:focus={evt => dotInteraction(index, evt)}
+                on:blur={evt => dotInteraction(index, evt)}
+            >
+                <circle
+                    cx={ xScale(commit.datetime) }
+                    cy={ yScale(commit.hourFrac) }
+                    r={dotSizescale(commit.totalLines)}
+                    fill='steelblue'
+                    fill-opacity={commit === hoveredCommit ? 1 : 0.6}
+                    class:selected={isCommitSelected(commit)}
+                />
+            </g>
+        {/each}
+    </g> -->
+<!--     
+    <g class="dots">
+        {#each commits as commit, index }
+            <g
+                tabindex="0"
+                aria-describedby="commit-tooltip"
+                on:mouseenter={evt => dotInteraction(index, evt)}
+                on:mouseleave={evt => dotInteraction(index, evt)}
+                on:focus={evt => dotInteraction(index, evt)}
+                on:blur={evt => dotInteraction(index, evt)}
+            >
+                <circle
+                    cx={ xScale(commit.datetime) }
+                    cy={ yScale(commit.hourFrac) }
+                    r={dotSizescale(commit.totalLines)}
+                    fill='steelblue'
+                    fill-opacity={commit === hoveredCommit ? 1 : 0.6}
+                    class:selected={isCommitSelected(commit)}
+                />
+            </g>
+        {/each}
+    </g> -->
+    
     <g class="dots">
         {#each commits as commit, index }
             <circle
@@ -284,11 +363,16 @@
                 fill='steelblue'
                 fill-opacity={commit === hoveredCommit ? 1 : 0.6}
                 class:selected={isCommitSelected(commit)}
-    	        on:mouseenter={evt => {
-                    hoveredIndex = index;
-                    cursor = {x: evt.x, y: evt.y};
-                }}
-	            on:mouseleave={evt => hoveredIndex = -1}        
+    	        on:mouseenter={evt => dotInteraction(index, evt)}
+	            on:mouseleave={evt => dotInteraction(index, evt)}   
+                tabindex="0"
+                aria-describedby="commit-tooltip"
+                role="tooltip"
+                aria-haspopup="true"
+                on:focus={evt => dotInteraction(index, evt)}
+                on:blur={evt => dotInteraction(index, evt)}
+                on:click={evt => dotInteraction(index, evt)}
+                on:keyup={evt => dotInteraction(index, evt)}     
             />
         {/each}
     </g>    

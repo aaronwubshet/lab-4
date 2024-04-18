@@ -24,7 +24,6 @@
     let cursor = {x: 0, y: 0};
     let dotSizescale;
     let svg;
-    let brushSelection;
     let selectedLines;
     let languageBreakdown;
 
@@ -47,22 +46,23 @@
    
     $: d3.select(svg).call(d3.brush().on("start brush end", brushed));
 
+    let selectedCommits = [];
     function brushed (evt) {
-        brushSelection = evt.selection
+        let brushSelection = evt.selection;
+        selectedCommits = !brushSelection ? [] : commits.filter(commit => {
+            let min = {x: brushSelection[0][0], y: brushSelection[0][1]};
+            let max = {x: brushSelection[1][0], y: brushSelection[1][1]};
+            let x = xScale(commit.date);
+            let y = yScale(commit.hourFrac);
+
+            return x >= min.x && x <= max.x && y >= min.y && y <= max.y;
+        });
     }
     function isCommitSelected (commit) {
-        if (!brushSelection) {
-            return false;
-        }
-        let min = {x: brushSelection[0][0], y: brushSelection[0][1]};
-        let max = {x: brushSelection[1][0], y: brushSelection[1][1]};
-        let x = xScale(commit.date);
-        let y = yScale(commit.hourFrac);
-        
-        return x >= min.x && x <= max.x && y >= min.y && y <= max.y;
+        return selectedCommits.includes(commit);
     }
-    $: selectedCommits = brushSelection ? commits.filter(isCommitSelected) : [];
-    $: hasSelection = brushSelection && selectedCommits.length > 0;
+
+    $: hasSelection = selectedCommits.length > 0;
     $: selectedLines = (hasSelection ? selectedCommits : commits).flatMap(d => d.lines);
     const format = d3.format(".1~%");
     $: languageBreakdown = d3.rollup(

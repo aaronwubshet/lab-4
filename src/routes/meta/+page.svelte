@@ -10,7 +10,11 @@
         offset,
     } from '@floating-ui/dom';
 
-    
+    import { scaleLinear, scaleTime, extent } from 'd3';
+
+    let commitProgress = 100;
+    let timeScale;
+
     let commitTooltip;
     let tooltipPosition = {x: 0, y: 0};
 
@@ -21,7 +25,6 @@
     let maxPeriod = 0;
     let avgDepth = 0;
     let width = 1000, height = 600;
-    import { scaleLinear, scaleTime, extent } from 'd3';
 
     let yScale, xScale;
 
@@ -45,8 +48,28 @@
     usableArea.width = usableArea.right - usableArea.left;
     usableArea.height = usableArea.bottom - usableArea.top;
     
+    let flattenedCommits=[];
+    $: flattenedCommits = commits.flat();
+    let minDate;
+    let maxDate;
+    $: minDate = d3.min(flattenedCommits, d => new Date(d.datetime));
+    $: maxDate = d3.max(flattenedCommits, d => new Date(d.datetime));
+
+    $: timeScale = scaleTime()
+            .domain([minDate, maxDate])
+            .range([0, 100])
+            .nice();
+
+    $: commitMaxTime = timeScale.invert(commitProgress);
+
+    let filteredCommits;
+    $: filteredCommits = flattenedCommits.filter(commit => new Date(commit.datetime) <= commitMaxTime);
+
+    let filteredLines;
+    $: filteredLines = data.filter(datum => new Date(datum.datetime) <= commitMaxTime);
 
     async function dotInteraction (index, evt) {
+        
         let hoveredDot = evt.target;
         if (evt.type === "mouseenter" || evt.type === "focus") {
             hoveredIndex = index;
@@ -73,7 +96,7 @@
         .domain([0, 24])
         .range([usableArea.bottom, usableArea.top]);
 
-    $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
+    $: hoveredCommit = filteredCommits[hoveredIndex] ?? hoveredCommit ?? {};
 
    
     $: d3.select(svg).call(d3.brush().on("start brush end", brushed));
@@ -81,7 +104,7 @@
     let selectedCommits = [];
     function brushed (evt) {
         let brushSelection = evt.selection;
-        selectedCommits = !brushSelection ? [] : commits.filter(commit => {
+        selectedCommits = !brushSelection ? [] : filteredCommits.filter(commit => {
             let min = {x: brushSelection[0][0], y: brushSelection[0][1]};
             let max = {x: brushSelection[1][0], y: brushSelection[1][1]};
             let x = xScale(commit.date);
@@ -103,9 +126,22 @@
         d => d.type
     );
     
-    
+    $: xScale = scaleTime()
+            .domain(d3.extent(filteredCommits, d => d.datetime))
+            .range([usableArea.left, usableArea.right])
+            .nice();
+    $: d3.select(xAxis).call(d3.axisBottom(xScale));
 
+    $: 
+    {
+        totalLinesout = filteredCommits && filteredCommits[0] && filteredCommits[0].totalLines;
+        avgDepth = d3.mean(filteredLines, d => d.depth);
+        workByPeriod = d3.rollups(filteredLines, v => v.length, d => d.datetime.toLocaleString("en", {dayPeriod: "short"}))
+        maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
+
+    }
     onMount(async () => {
+        console.log(totalLinesout);
         data = await d3.csv("loc.csv", row => ({
         ...row,
         line: Number(row.line), // or just +row.line
@@ -140,19 +176,11 @@
         });
         commits = d3.sort(commits, d => -d.totalLines);
 
-        
-        xScale = scaleTime()
-            .domain(d3.extent(commits, d => d.datetime))
-            .range([usableArea.left, usableArea.right])
-            .nice();
-
-
         dotSizescale = d3.scaleSqrt()
             .domain(d3.extent(commits, d => d.totalLines))
             .range([2,30]);
-                
-            
-        d3.select(xAxis).call(d3.axisBottom(xScale));
+              
+        
         d3.select(yAxis).call(d3.axisLeft(yScale).tickFormat(d => String(d % 24).padStart(2, "0") + ":00"));
         d3.select(yAxisGridlines).call(
             d3.axisLeft(yScale)
@@ -160,11 +188,8 @@
             .tickSize(-usableArea.width)
         );
         
-
-        totalLinesout = commits[0].totalLines;
-        avgDepth = d3.mean(data, d => d.depth);
-        workByPeriod = d3.rollups(data, v => v.length, d => d.datetime.toLocaleString("en", {dayPeriod: "short"}))
-        maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
+        
+        
 
         
     });
@@ -269,11 +294,30 @@
         stroke-width: 2;
         fill: red;
     }
+    .slider-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    .slider {
+        flex: 1;
+    }
+    .time-display {
+        text-align: center;
+    }
+    @starting-style {
+	    r: 0;
+    }
 </style>
 
 <h1>Meta</h1>
 <p> This page contains stats about the code base</p>
 
+<label class="slider-container">
+    <input type="range" bind:value={commitProgress} min="0" max="100" class="slider">
+    <time class="time-display">{commitMaxTime.toLocaleString("en", { dateStyle: 'long', timeStyle: 'short' })}</time>
+</label>
+<p> </p>
 
 <dl class="stats">
 	<dt>Total <abbr title="Lines of code">LOC</abbr></dt>
@@ -285,6 +329,9 @@
     <dt>The average depth is</dt>
 	<dd>{avgDepth}</dd>
 </dl>
+
+
+
 <dl id="commit-tooltip" class="info tooltip" hidden={hoveredIndex === -1} bind:this={commitTooltip} style="top: {tooltipPosition.y}px; left: {tooltipPosition.x}px">
 	<dt>Commit</dt>
 	<dd><a href="{ hoveredCommit.url }" target="_blank">{ hoveredCommit.id }</a></dd>
@@ -307,8 +354,8 @@
     <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
     <g bind:this={svg} />
     <g class="gridlines" transform="translate({usableArea.left}, 0)" bind:this={yAxisGridlines} />
-    <!-- <g class="dots">
-        {#each commits as commit, index }
+    <g class="dots">
+        {#each filteredCommits as commit, index (commit.id) }
             <g
                 tabindex="0"
                 role="button"
@@ -330,52 +377,7 @@
                 />
             </g>
         {/each}
-    </g> -->
-<!--     
-    <g class="dots">
-        {#each commits as commit, index }
-            <g
-                tabindex="0"
-                aria-describedby="commit-tooltip"
-                on:mouseenter={evt => dotInteraction(index, evt)}
-                on:mouseleave={evt => dotInteraction(index, evt)}
-                on:focus={evt => dotInteraction(index, evt)}
-                on:blur={evt => dotInteraction(index, evt)}
-            >
-                <circle
-                    cx={ xScale(commit.datetime) }
-                    cy={ yScale(commit.hourFrac) }
-                    r={dotSizescale(commit.totalLines)}
-                    fill='steelblue'
-                    fill-opacity={commit === hoveredCommit ? 1 : 0.6}
-                    class:selected={isCommitSelected(commit)}
-                />
-            </g>
-        {/each}
-    </g> -->
-    
-    <g class="dots">
-        {#each commits as commit, index }
-            <circle
-                cx={ xScale(commit.datetime) }
-                cy={ yScale(commit.hourFrac) }
-                r={dotSizescale(commit.totalLines)}
-                fill='steelblue'
-                fill-opacity={commit === hoveredCommit ? 1 : 0.6}
-                class:selected={isCommitSelected(commit)}
-    	        on:mouseenter={evt => dotInteraction(index, evt)}
-	            on:mouseleave={evt => dotInteraction(index, evt)}   
-                tabindex="0"
-                aria-describedby="commit-tooltip"
-                role="tooltip"
-                aria-haspopup="true"
-                on:focus={evt => dotInteraction(index, evt)}
-                on:blur={evt => dotInteraction(index, evt)}
-                on:click={evt => dotInteraction(index, evt)}
-                on:keyup={evt => dotInteraction(index, evt)}     
-            />
-        {/each}
-    </g>    
+    </g>
     
     
 </svg>
@@ -386,4 +388,5 @@
     {/each}
   </dl>
 
-<Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: (lines)*selectedLines.length}))} />
+<Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
+    

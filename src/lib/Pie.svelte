@@ -6,13 +6,22 @@
 
     let sliceGenerator = d3.pie().value((d) => d.value);
 
-    $: arcData = sliceGenerator(data);
-    $: arcs = arcData.map((d) => arcGenerator(d));
+    // $: arcData = sliceGenerator(data);
+    // $: arcs = arcData.map((d) => arcGenerator(d));
 
     let colors = d3.scaleOrdinal(d3.schemeTableau10);
 
     export let selectedIndex = -1;
     
+    let pieData;
+    $: {
+        pieData = data.map(d => ({...d}));
+        let arcData = sliceGenerator(pieData);
+        let arcs = arcData.map((d) => arcGenerator(d));
+        pieData = pieData.map((d, i) => ({...d, ...arcData[i], arc: arcs[i]}));
+
+    };
+
 
 
 </script>
@@ -20,9 +29,9 @@
 <div class="container">
 <svg viewBox="-50 -50 100 100">
 
-    {#each data as d, i}
+    {#each pieData as d, i}
             <path 
-            d={arcs[i]} 
+            d={d.arc} 
             fill={ colors(d.label)  }
             class:selected={selectedIndex === i}
             on:click={e => selectedIndex = selectedIndex === i ? -1 : i}
@@ -30,29 +39,16 @@
             tabindex="0"
             role="button"
         />
-        <!-- <path 
-        d={arcs[i]} 
-        fill={ colors(d.label)  }
-        class:selected={selectedIndex === i}
-        on:click={e => selectedIndex = selectedIndex === i ? -1 : i}    
-        /> -->
+
     {/each}
 
-    <!-- {#each arcs as arc, i}
-        <path 
-        d="{arc}" 
-        fill={colors(i)}
-        class:selected={selectedIndex === i}
-        on:click={e => selectedIndex = selectedIndex === i ? -1 : i}    
-        />
-    {/each} -->
     
 </svg>
 
 
     <ul class="legend">
-        {#each data as d, index}
-            <li style="--color: { colors(index) }">
+        {#each pieData as d}
+            <li style="--color: { colors(d.label) }">
                 <span class="swatch">  </span>
                 {d.label} <em>({d.value})</em>
             </li>

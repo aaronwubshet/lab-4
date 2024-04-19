@@ -147,7 +147,7 @@
     }
 
 </style>
-<FileLines colors={colors} lines={filteredLines} />
+
 <h1>Meta</h1>
 <p> This page contains stats about the code base</p>
 <p> Show commits until :</p>
@@ -183,4 +183,4 @@
 
 <Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
 
-
+<FileLines colors={colors} lines={filteredLines} />

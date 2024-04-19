@@ -81,7 +81,6 @@
     }
 
     function isCommitSelected (commit) {
-        console.log(selectedCommits);
         return selectedCommits.includes(commit);
     }
 

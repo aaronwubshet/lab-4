@@ -155,24 +155,8 @@
 
 <h1>Meta</h1>
 <p> This page contains stats about the code base</p>
-<p> Show commits until :</p>
-<label class="slider-container">
-    <input type="range" bind:value={commitProgress} min="0" max="100" class="slider">
-    <time class="time-display">{commitMaxTime.toLocaleString("en", { dateStyle: 'long', timeStyle: 'short' })}</time>
-</label>
 
 
-
-<dl class="stats">
-	<dt>Total <abbr title="Lines of code">LOC</abbr></dt>
-	<dd>{data.length}</dd>
-    <dt>Lines Editted by Last Commit </dt>
-	<dd>{totalLinesout}</dd>
-    <dt>Most commits are done</dt>
-	<dd>{maxPeriod}</dd>
-    <dt>The average depth is</dt>
-	<dd>{avgDepth}</dd>
-</dl>
 
 
 
@@ -186,6 +170,16 @@
         </p>
     {/each}
 	<svelte:fragment slot="viz">
+        <dl class="stats">
+            <dt>Total <abbr title="Lines of code">LOC</abbr></dt>
+            <dd>{data.length}</dd>
+            <dt>Lines Editted by Last Commit </dt>
+            <dd>{totalLinesout}</dd>
+            <dt>Most commits are done</dt>
+            <dd>{maxPeriod}</dd>
+            <dt>The average depth is</dt>
+            <dd>{avgDepth}</dd>
+        </dl>
         <Scatterplot commits={filteredCommits} bind:selectedCommits={selectedCommits} colors={colors}/>
 
 
@@ -198,6 +192,21 @@
         </dl>
         
         <Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
+        
+    </svelte:fragment>
+</Scrolly>
+
+
+<Scrolly bind:progress={ commitMaxTime } --scrolly-layout="viz-first" --scrolly-viz-width="1.5fr" debounce={1000}>
+    {#each commits as commit, index }
+        <p>
+            On {commit.datetime.toLocaleString("en", {dateStyle: "full", timeStyle: "short"})},
+            I made <a href="{commit.url}" target="_blank">{ index > 0 ? 'another glorious commit' : 'my first commit, and it was glorious' }</a>.
+            I edited {commit.totalLines} lines across { d3.rollups(commit.lines, D => D.length, d => d.file).length } files.
+            Then I looked over all I had made, and I saw that it was very good.
+        </p>
+    {/each}
+	<svelte:fragment slot="viz">
         
         <FileLines colors={colors} lines={filteredLines} />	
     </svelte:fragment>

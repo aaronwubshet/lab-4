@@ -7,10 +7,6 @@
 
     let sliceGenerator = d3.pie().value(d => d.value).sort(null);
 
-
-    // $: arcData = sliceGenerator(data);
-    // $: arcs = arcData.map((d) => arcGenerator(d));
-
     let colors = d3.scaleOrdinal(d3.schemeTableau10);
 
     export let selectedIndex = -1;
@@ -29,10 +25,9 @@
 
     };
     
-    export let transitionDuration = 300;
+    export let transitionDuration = 100;
 
     
-
     function transitionArcs() {
         let wedgeElements = Object.values(wedges);
 
@@ -71,16 +66,16 @@
         if (transition) {
             return {
                 css: t => `d: ${transition.interpolator(t)}`,
-                duration: 1000,
-                easing: easeCubic
+                duration: 100,
+                easing: d3.easeLinear
             };
         }
 
         // If there's no transition, return a function that always returns "d: path(0,0)"
         return {
             css: () => 'd: path(0,0)',
-            duration: 1000,
-            easing: easeCubic
+            duration: 100,
+            easing: d3.easeLinear
         };
     }
     function transitionArc (wedge, label) {
@@ -90,12 +85,17 @@
         if (sameArc(d_old, d)) {
             return null;
         }
-        if (!d || !d_old) {
-            let from = d_old ? {...d_old} : getEmptyArc(label, oldData);
-            let to = d ? {...d} : getEmptyArc(label,pieData);
-        }
-        let from = {...d_old};
-        let to = {...d};
+        let from = d_old ? {...d_old} : getEmptyArc(label, oldData);
+        let to = d ? {...d} : getEmptyArc(label,pieData);
+        // if (!d || !d_old) {
+        //     let from = d_old ? {...d_old} : getEmptyArc(label, oldData);
+        //     let to = d ? {...d} : getEmptyArc(label,pieData);
+        // }
+        // else{
+        //     let from = {...d_old};
+        //     let to = {...d};
+        // }
+        
         let angleInterpolator = d3.interpolate(from, to);
         let interpolator = t => `path("${ arcGenerator(angleInterpolator(t)) }")`;
         let type = d ? d_old ? "update" : "in" : "out";

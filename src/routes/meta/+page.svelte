@@ -28,12 +28,19 @@
     let hasSelection;
     let languageBreakdown;
 
+
+    let pieDatainput;
+
+    
+
     let flattenedCommits=[];
     $: flattenedCommits = commits.flat();
 
     let minfile;
     let maxfile;
     
+    
+
     $: minfile = d3.min(flattenedCommits, d => d.totalLines);
     $: maxfile = d3.max(flattenedCommits, d => d.totalLines);
     $: fileScale = d3.scaleLinear()
@@ -65,15 +72,18 @@
     $: filteredLines = data.filter(datum => new Date(datum.datetime) <= commitMaxTime);
 
 
-    $: hasSelection = selectedCommits.length > 0;
-    $: selectedLines = (hasSelection ? selectedCommits : commits).flatMap(d => d.lines);
+    $: hasSelection = filteredCommits.length > 0;
+    $: selectedLines = (hasSelection ? filteredCommits : commits).flatMap(d => d.lines);
     const format = d3.format(".1~%");
     $: languageBreakdown = d3.rollup(
         selectedLines,
-        v => d3.count(v, d => d.line)/ selectedLines.length,
+        v => v.length,
+        // 3.count(v, d => d.line),
         d => d.type
     );
     
+    $: pieDatainput = Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines)}));
+    $: console.log(selectedCommits);
     $: 
     {
         totalLinesout = filteredCommits && filteredCommits[0] && filteredCommits[0].totalLines;
@@ -204,18 +214,18 @@
 
         <p>{hasSelection ? selectedCommits.length : "No"} commits selected</p>
         <dl class="stats">
-            {#each languageBreakdown as [language, proportion]}
-            <dd>{language}: {format(proportion)}</dd>
+            {#each languageBreakdown as [language, totalLength]}
+            <dd>{language}: {format(totalLength/selectedLines.length)}</dd>
             {/each}
         </dl>
         
-        <Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
+        <Pie data={pieDatainput} />
         
     </svelte:fragment>
 </Scrolly>
 
 
-<Scrolly bind:progress={ fileSizeProgress } maxTime={maxsize} --scrolly-layout="viz-first" --scrolly-viz-width="1.5fr" debounce={1000}>
+<Scrolly bind:progress={ fileSizeProgress } --scrolly-layout="viz-first" --scrolly-viz-width="1.5fr" debounce={1000}>
     {#each commits as commit, index }
         <p>
             On {commit.datetime.toLocaleString("en", {dateStyle: "full", timeStyle: "short"})},

@@ -17,6 +17,10 @@
     let commitProgress = 100;
     let timeScale;
 
+    let fileSizeProgress = 100;
+    let fileTiming;
+    let maxsize=248;
+
     let data = [];
     let commits = [];
    
@@ -24,9 +28,22 @@
     let hasSelection;
     let languageBreakdown;
 
-    
     let flattenedCommits=[];
     $: flattenedCommits = commits.flat();
+
+    let minfile;
+    let maxfile;
+    
+    $: minfile = d3.min(flattenedCommits, d => d.totalLines);
+    $: maxfile = d3.max(flattenedCommits, d => d.totalLines);
+    $: fileScale = d3.scaleLinear()
+            .domain([minfile, maxfile])
+            .range([0, 100])
+            .nice();
+
+    $: fileTiming = timeScale.invert(fileSizeProgress);
+
+    
     let minDate;
     let maxDate;
     $: minDate = d3.min(flattenedCommits, d => new Date(d.datetime));
@@ -38,6 +55,8 @@
             .nice();
 
     $: commitMaxTime = timeScale.invert(commitProgress);
+
+    
 
     let filteredCommits;
     $: filteredCommits = flattenedCommits.filter(commit => new Date(commit.datetime) <= commitMaxTime);
@@ -54,7 +73,7 @@
         v => d3.count(v, d => d.line)/ selectedLines.length,
         d => d.type
     );
-
+    
     $: 
     {
         totalLinesout = filteredCommits && filteredCommits[0] && filteredCommits[0].totalLines;
@@ -63,7 +82,6 @@
         maxPeriod = d3.greatest(workByPeriod, (d) => d[1])?.[0];
 
     }
-
     let colors = d3.scaleOrdinal(d3.schemeTableau10);
     onMount(async () => {
         
@@ -197,7 +215,7 @@
 </Scrolly>
 
 
-<Scrolly bind:progress={ commitMaxTime } --scrolly-layout="viz-first" --scrolly-viz-width="1.5fr" debounce={1000}>
+<Scrolly bind:progress={ fileSizeProgress } maxTime={maxsize} --scrolly-layout="viz-first" --scrolly-viz-width="1.5fr" debounce={1000}>
     {#each commits as commit, index }
         <p>
             On {commit.datetime.toLocaleString("en", {dateStyle: "full", timeStyle: "short"})},

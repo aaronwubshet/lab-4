@@ -5,6 +5,8 @@
     import FileLines from "./FileLines.svelte";
     import Pie from "$lib/Pie.svelte";
     import {scaleTime } from 'd3';
+    import Scrolly from "svelte-scrolly";
+
 
     let totalLinesout = 0;
     let workByPeriod = [];
@@ -146,6 +148,9 @@
         text-align: center;
     }
 
+    :global(body) {
+        max-width: min(120ch, 80vw);
+    }
 </style>
 
 <h1>Meta</h1>
@@ -170,17 +175,30 @@
 </dl>
 
 
-<Scatterplot commits={filteredCommits} bind:selectedCommits={selectedCommits} colors={colors}/>
 
-
-
-<p>{hasSelection ? selectedCommits.length : "No"} commits selected</p>
-<dl class="stats">
-    {#each languageBreakdown as [language, proportion]}
-      <dd>{language}: {format(proportion)}</dd>
+<Scrolly bind:progress={ commitProgress }>
+    {#each commits as commit, index }
+        <p>
+            On {commit.datetime.toLocaleString("en", {dateStyle: "full", timeStyle: "short"})},
+            I made <a href="{commit.url}" target="_blank">{ index > 0 ? 'another glorious commit' : 'my first commit, and it was glorious' }</a>.
+            I edited {commit.totalLines} lines across { d3.rollups(commit.lines, D => D.length, d => d.file).length } files.
+            Then I looked over all I had made, and I saw that it was very good.
+        </p>
     {/each}
-  </dl>
+	<svelte:fragment slot="viz">
+        <Scatterplot commits={filteredCommits} bind:selectedCommits={selectedCommits} colors={colors}/>
 
-<Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
 
-<FileLines colors={colors} lines={filteredLines} />
+
+        <p>{hasSelection ? selectedCommits.length : "No"} commits selected</p>
+        <dl class="stats">
+            {#each languageBreakdown as [language, proportion]}
+            <dd>{language}: {format(proportion)}</dd>
+            {/each}
+        </dl>
+        
+        <Pie data={Array.from(languageBreakdown).map(([language, lines]) => ({label: language, value: Math.floor(lines * selectedLines.length)}))} />
+        
+        <FileLines colors={colors} lines={filteredLines} />	
+    </svelte:fragment>
+</Scrolly>

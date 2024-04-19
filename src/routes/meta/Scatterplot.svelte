@@ -8,7 +8,7 @@
     } from '@floating-ui/dom';
 
     import { scaleLinear, scaleTime, extent } from 'd3';
-
+    export let color;
     export let commits = [];
     export let selectedCommits = [];
 
@@ -41,19 +41,7 @@
     usableArea.width = usableArea.right - usableArea.left;
     usableArea.height = usableArea.bottom - usableArea.top;
     
-    // let flattenedCommits=[];
-    // $: flattenedCommits = commits.flat();
-    // let minDate;
-    // let maxDate;
-    // $: minDate = d3.min(flattenedCommits, d => new Date(d.datetime));
-    // $: maxDate = d3.max(flattenedCommits, d => new Date(d.datetime));
-
-    // $: timeScale = scaleTime()
-    //         .domain([minDate, maxDate])
-    //         .range([0, 100])
-    //         .nice();
-
-    // $: commitMaxTime = timeScale.invert(commitProgress);
+   
 
 
     async function dotInteraction (index, evt) {
